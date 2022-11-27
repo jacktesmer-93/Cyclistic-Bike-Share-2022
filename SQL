@@ -1,0 +1,195 @@
+#I began by combing all tables
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.April 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.August 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.Dec 2021`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.Feb 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.Jan 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.July 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.June 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.March 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.May 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.October 2022`
+UNION ALL
+Select ride_id, rideable_type, started_at, ended_at, start_station_name, start_station_id, end_station_name, end_station_id, start_lat, start_lng, end_lat, end_lng, member_casual
+From `cyclistic-bike-share-368704.Bike_Share_2022.September 2022`
+42
+
+#Total record count = 5,755,694
+SELECT COUNT (*)
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+
+#Add day of the week column
+ALTER TABLE `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+ADD COLUMN day_of_week STRING;
+
+UPDATE `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+SET day_of_week = FORMAT_DATE('%A', started_at)
+WHERE TRUE;
+
+
+
+#Add ride time column
+ALTER TABLE `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+ADD COLUMN ride_time INT64;
+
+UPDATE `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+SET ride_time = TIMESTAMP_DIFF(ended_at , started_at, SECOND)  
+WHERE TRUE;
+
+#Check for instances where ride time is before start time = 112 instances
+SELECT COUNT(ride_time)
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE ended_at < started_at;
+
+#Check for NULL values in long/lat columns = 5835
+SELECT COUNT(*)
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE start_lat IS NULL
+OR
+start_lng IS NULL
+OR
+end_lat IS NULL
+OR
+end_lng IS NULL;
+
+#Check for NULL values in start and end station = 1,345,256
+SELECT COUNT(*)
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE start_station_name IS NULL
+OR
+end_station_name IS NULL;
+
+#Delete records that are not relevant to analysis
+DELETE FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE ended_at < started_at;
+
+DELETE FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE start_lat IS NULL
+OR
+start_lng IS NULL
+OR
+end_lat IS NULL
+OR
+end_lng IS NULL;
+
+#Count new rows = 5,749,747
+SELECT COUNT (*)
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+
+#Rides by customer type
+#Casual Rider = 2,347,828
+#Annual Member = 3,401,919
+SELECT member_casual,
+COUNT(ride_id) AS total_rides
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY  member_casual
+ORDER BY member_casual;
+
+#Average ride time per customer type (seconds)
+#Casual Rider = 1339
+#Annual Member = 745
+SELECT member_casual,
+AVG(ride_time) AS average_ride_time,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY  member_casual
+ORDER BY member_casual;
+
+#Count of rideable type, bike type, and average time
+SELECT member_casual, rideable_type,
+AVG(ride_time) AS average_ride_time,
+COUNT (rideable_type) AS bike_totals
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY rideable_type, member_casual
+ORDER BY member_casual;
+
+#Ride count, average ride time by customer type
+SELECT member_casual, day_of_week,
+AVG(ride_time) AS average_ride_time,
+COUNT(started_at) AS Number_of_Rides
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY  member_casual, day_of_week
+ORDER BY member_casual;
+
+#Count ride type by month - then extracted into sheets
+SELECT member_casual, rideable_type,
+EXTRACT(MONTH from started_at) AS month,
+COUNT (rideable_type) AS bike_totals,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY rideable_type, member_casual, month
+ORDER BY month;
+
+#Average ride time and monthly total by customer type - extracted in google sheets 
+SELECT member_casual,
+EXTRACT(MONTH from started_at) AS month,
+AVG(ride_time) AS average_ride_time,
+COUNT (started_at) AS monthly_total,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY member_casual, month
+ORDER BY month;
+
+#Count average ride time, number of rides, and ride type - extracted into google sheets
+SELECT member_casual, rideable_type,
+EXTRACT(MONTH from started_at) AS month,
+AVG(ride_time) AS average_ride_time,
+COUNT (rideable_type) AS bike_totals,day_of_week,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+GROUP BY rideable_type, member_casual, day_of_week, month
+ORDER BY month;
+
+#Most used stations by casual rider, start
+SELECT start_station_name,
+COUNT(start_station_name) AS top_casual_starts,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE member_casual = 'casual'
+GROUP BY start_station_name, member_casual
+ORDER BY top_casual_starts DESC
+LIMIT 20;
+
+#Most used stations by casual rider, end
+SELECT member_casual, end_station_name,
+COUNT(end_station_name) AS top_casual_ends,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE member_casual = 'casual'
+GROUP BY end_station_name, member_casual
+ORDER BY top_casual_ends DESC
+LIMIT 20;
+
+#Most used stations by annual member, start
+SELECT member_casual, start_station_name,
+COUNT(start_station_name) AS top_member_starts,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE member_casual = 'member'
+GROUP BY start_station_name, member_casual
+ORDER BY top_member_starts DESC
+LIMIT 20;
+
+#Most used stations by annual member, end
+SELECT member_casual, end_station_name,
+COUNT(end_station_name) AS top_member_ends,
+FROM `cyclistic-bike-share-368704.Bike_Share_2022.Nov 2021-Oct 2022`
+WHERE member_casual = 'member'
+GROUP BY end_station_name, member_casual
+ORDER BY top_member_ends DESC
+LIMIT 20;
